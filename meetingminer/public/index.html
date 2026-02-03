@@ -34,9 +34,38 @@
     <div id="resultsSection" class="results-section" style="display: none;">
       <div class="results-header">
         <h2>Analysis Results</h2>
-        <button id="newAnalysisBtn" class="btn-secondary">New Analysis</button>
+        <div class="export-buttons">
+          <button id="exportPdfBtn" class="btn-export">📄 Export PDF</button>
+          <button id="copyBtn" class="btn-export">📋 Copy Text</button>
+          <button id="newAnalysisBtn" class="btn-secondary">New Analysis</button>
+        </div>
       </div>
       <div id="analysisContent" class="analysis-content"></div>
+    </div>
+
+    <div id="dashboardSection" class="dashboard-section" style="display: none;">
+      <h2>📊 Action Items Dashboard</h2>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="totalItems">0</div>
+          <div class="stat-label">Total Items</div>
+        </div>
+        <div class="stat-card high">
+          <div class="stat-number" id="highPriority">0</div>
+          <div class="stat-label">High Priority</div>
+        </div>
+        <div class="stat-card medium">
+          <div class="stat-number" id="mediumPriority">0</div>
+          <div class="stat-label">Medium Priority</div>
+        </div>
+        <div class="stat-card low">
+          <div class="stat-number" id="lowPriority">0</div>
+          <div class="stat-label">Low Priority</div>
+        </div>
+      </div>
+      
+      <div id="actionItemsList" class="action-items-list"></div>
     </div>
 
     <div class="examples">

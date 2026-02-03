@@ -5,8 +5,11 @@ const loadingSection = document.getElementById('loadingSection');
 const resultsSection = document.getElementById('resultsSection');
 const analysisContent = document.getElementById('analysisContent');
 const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+const exportPdfBtn = document.getElementById('exportPdfBtn');
+const copyBtn = document.getElementById('copyBtn');
 
 let selectedFile = null;
+let currentAnalysis = '';
 
 // Click to upload
 uploadBox.addEventListener('click', () => {
@@ -52,6 +55,7 @@ analyzeBtn.addEventListener('click', async () => {
   document.querySelector('.upload-section').style.display = 'none';
   loadingSection.style.display = 'block';
   resultsSection.style.display = 'none';
+  document.getElementById('dashboardSection').style.display = 'none';
 
   try {
     const formData = new FormData();
@@ -68,12 +72,18 @@ analyzeBtn.addEventListener('click', async () => {
 
     const data = await response.json();
 
+    // Store current analysis
+    currentAnalysis = data.analysis;
+
     // Show results
     loadingSection.style.display = 'none';
     resultsSection.style.display = 'block';
     
-    // Convert markdown to HTML (basic)
+    // Convert markdown to HTML
     analysisContent.innerHTML = formatMarkdown(data.analysis);
+    
+    // Parse and show dashboard
+    parseActionItems(data.analysis);
 
   } catch (error) {
     loadingSection.style.display = 'none';
@@ -82,11 +92,109 @@ analyzeBtn.addEventListener('click', async () => {
   }
 });
 
+// Parse and display action items dashboard
+function parseActionItems(analysisText) {
+  const actionItemsSection = analysisText.match(/## 1\. ACTION ITEMS([\s\S]*?)(?=## |$)/i);
+  if (!actionItemsSection) {
+    document.getElementById('dashboardSection').style.display = 'none';
+    return;
+  }
+  
+  const items = [];
+  const lines = actionItemsSection[1].split('\n');
+  
+  lines.forEach(line => {
+    if (line.trim().startsWith('*') || line.trim().startsWith('-')) {
+      const taskMatch = line.match(/\*\*Task:\*\*\s*(.+?)(?:\||$)/i);
+      const ownerMatch = line.match(/\*\*Owner:\*\*\s*(.+?)(?:\||$)/i);
+      const deadlineMatch = line.match(/\*\*Deadline:\*\*\s*(.+?)(?:\||$)/i);
+      const priorityMatch = line.match(/\*\*Priority:\*\*\s*(High|Medium|Low)/i);
+      
+      if (taskMatch) {
+        items.push({
+          task: taskMatch[1].trim(),
+          owner: ownerMatch ? ownerMatch[1].trim() : 'Unassigned',
+          deadline: deadlineMatch ? deadlineMatch[1].trim() : 'No deadline',
+          priority: priorityMatch ? priorityMatch[1].trim() : 'Medium'
+        });
+      }
+    }
+  });
+  
+  if (items.length === 0) {
+    document.getElementById('dashboardSection').style.display = 'none';
+    return;
+  }
+  
+  // Update stats
+  document.getElementById('totalItems').textContent = items.length;
+  document.getElementById('highPriority').textContent = items.filter(i => i.priority === 'High').length;
+  document.getElementById('mediumPriority').textContent = items.filter(i => i.priority === 'Medium').length;
+  document.getElementById('lowPriority').textContent = items.filter(i => i.priority === 'Low').length;
+  
+  // Display items
+  const itemsList = document.getElementById('actionItemsList');
+  itemsList.innerHTML = items.map(item => `
+    <div class="action-item ${item.priority.toLowerCase()}">
+      <div class="action-item-header">
+        <div class="action-item-task">${item.task}</div>
+        <span class="action-item-priority priority-${item.priority.toLowerCase()}">${item.priority}</span>
+      </div>
+      <div class="action-item-details">
+        <span>👤 ${item.owner}</span>
+        <span>📅 ${item.deadline}</span>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('dashboardSection').style.display = 'block';
+}
+
+// Export PDF
+exportPdfBtn.addEventListener('click', async () => {
+  try {
+    const response = await fetch('/export-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        analysis: currentAnalysis,
+        filename: `meeting-analysis-${Date.now()}`
+      })
+    });
+    
+    if (!response.ok) throw new Error('Export failed');
+    
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `meeting-analysis-${Date.now()}.pdf`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    alert('Failed to export PDF: ' + error.message);
+  }
+});
+
+// Copy to clipboard
+copyBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(currentAnalysis).then(() => {
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = '✅ Copied!';
+    setTimeout(() => {
+      copyBtn.textContent = originalText;
+    }, 2000);
+  }).catch(() => {
+    alert('Failed to copy to clipboard');
+  });
+});
+
 // New analysis button
 newAnalysisBtn.addEventListener('click', resetUpload);
 
 function resetUpload() {
   selectedFile = null;
+  currentAnalysis = '';
   fileInput.value = '';
   uploadBox.classList.remove('file-selected');
   uploadBox.querySelector('.upload-text').textContent = 'Click to upload or drag & drop';
@@ -96,6 +204,7 @@ function resetUpload() {
   document.querySelector('.upload-section').style.display = 'block';
   loadingSection.style.display = 'none';
   resultsSection.style.display = 'none';
+  document.getElementById('dashboardSection').style.display = 'none';
 }
 
 // Better markdown to HTML converter
@@ -122,7 +231,6 @@ function formatMarkdown(text) {
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
   
   // Lists - improved handling
-  // First, handle bullet points with * or -
   let lines = html.split('\n');
   let inList = false;
   let processedLines = [];
@@ -151,7 +259,6 @@ function formatMarkdown(text) {
     // Not a list item
     else {
       if (inList && line.length > 0) {
-        // Close the list if we hit non-list content
         processedLines.push('</ul>');
         inList = false;
       }
