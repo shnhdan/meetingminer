@@ -60,10 +60,10 @@ app.post('/analyze', upload.single('file'), async (req, res) => {
 
     console.log('Final mime type:', mimeType);
 
-    // Use Gemini 2.0 Flash - THIS IS THE IMPORTANT CHANGE
-    console.log('Initializing Gemini model...');
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
-
+    
+     console.log('Initializing Gemini model...');
+     const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+     
     const prompt = `You are MeetingMiner, an AI that extracts actionable intelligence from meeting content.
 
 Analyze this meeting content and provide:
@@ -141,7 +141,7 @@ app.get('/health', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`\n🚀 MeetingMiner running on port ${PORT}`);
+  console.log(`\n MeetingMiner running on port ${PORT}`);
   console.log(`📂 Open: http://localhost:${PORT}`);
   console.log(`🔑 API Key configured: ${process.env.GEMINI_API_KEY ? 'Yes' : 'NO - CHECK .env FILE!'}\n`);
 });
