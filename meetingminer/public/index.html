@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeetingMiner - Extract Intelligence from Meetings</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔍 MeetingMiner</h1>
+      <p>Upload meeting screenshots, transcripts, or Slack conversations</p>
+    </header>
+
+    <div class="upload-section">
+      <div class="upload-box" id="uploadBox">
+        <div class="upload-icon">📄</div>
+        <p class="upload-text">Click to upload or drag & drop</p>
+        <p class="upload-hint">Screenshots, PDFs, or text files</p>
+        <input type="file" id="fileInput" accept="image/*,.pdf,.txt" hidden>
+      </div>
+      
+      <button id="analyzeBtn" class="btn-primary" disabled>
+        Analyze Meeting
+      </button>
+    </div>
+
+    <div id="loadingSection" class="loading-section" style="display: none;">
+      <div class="spinner"></div>
+      <p>Analyzing your meeting content...</p>
+    </div>
+
+    <div id="resultsSection" class="results-section" style="display: none;">
+      <div class="results-header">
+        <h2>Analysis Results</h2>
+        <button id="newAnalysisBtn" class="btn-secondary">New Analysis</button>
+      </div>
+      <div id="analysisContent" class="analysis-content"></div>
+    </div>
+
+    <div class="examples">
+      <h3>What you can upload:</h3>
+      <ul>
+        <li>📸 Screenshots of Slack/Teams conversations</li>
+        <li>📝 Meeting transcripts (txt or PDF)</li>
+        <li>💬 Screenshots of whiteboard sessions</li>
+        <li>📊 Screenshots of project management boards</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

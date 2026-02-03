@@ -1,0 +1,14 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Roman;\f1\froman\fcharset0 Times-Italic;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red197\green136\blue83;\red74\green80\blue93;
+\red136\green185\blue102;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c81961\c60392\c40000;\cssrgb\c36078\c38824\c43922;
+\cssrgb\c59608\c76471\c47451;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Team Standup - Feb \cf3 \strokec3 3\cf0 \strokec2 , \cf3 \strokec3 2026\cf0 \strokec2  Sarah: I finished the login feature. Need John to review PR 
+\f1\i \cf4 \strokec4 #234 by EOD.
+\f0\i0 \cf0 \strokec2  John: I\cf5 \strokec5 'll review it today. Also, we need to decide on the database - PostgreSQL vs MySQL. \cf0 \strokec2 Mike: I vote PostgreSQL. Better JSON support. Sarah, can you research hosting costs? \cf5 \strokec5 Sarah: Sure, I'\cf0 \strokec2 ll have that by Friday. John: Sounds good. One issue - the API is timing out on large uploads. This is blocking the mobile team. Mike: That\cf5 \strokec5 's critical. John, can you prioritize this today? John: Yes, I'\cf0 \strokec2 ll fix it by tonight. Sarah: Should we schedule a follow-up on the database decision? Mike: Let's meet Thursday 2pm to finalize it.}
