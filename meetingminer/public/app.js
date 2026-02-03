@@ -98,33 +98,91 @@ function resetUpload() {
   resultsSection.style.display = 'none';
 }
 
-// Basic markdown to HTML converter
+// Better markdown to HTML converter
 function formatMarkdown(text) {
   let html = text;
   
-  // Headers
+  // Escape HTML first to prevent injection
+  html = html.replace(/&/g, '&amp;')
+             .replace(/</g, '&lt;')
+             .replace(/>/g, '&gt;');
+  
+  // Headers (must come before other formatting)
   html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
   html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
   html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
   
-  // Bold
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Bold and italic
+  html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
   
-  // Lists
-  html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
-  html = html.replace(/^\- (.*$)/gim, '<li>$1</li>');
-  html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+  // Code blocks
+  html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
   
-  // Line breaks
-  html = html.replace(/\n\n/g, '</p><p>');
+  // Lists - improved handling
+  // First, handle bullet points with * or -
+  let lines = html.split('\n');
+  let inList = false;
+  let processedLines = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+    
+    // Check if this is a list item
+    if (line.match(/^[\*\-]\s+(.+)/)) {
+      if (!inList) {
+        processedLines.push('<ul>');
+        inList = true;
+      }
+      let content = line.replace(/^[\*\-]\s+/, '');
+      processedLines.push(`<li>${content}</li>`);
+    } 
+    // Check if this is a numbered list item
+    else if (line.match(/^\d+\.\s+(.+)/)) {
+      if (!inList) {
+        processedLines.push('<ol>');
+        inList = true;
+      }
+      let content = line.replace(/^\d+\.\s+/, '');
+      processedLines.push(`<li>${content}</li>`);
+    }
+    // Not a list item
+    else {
+      if (inList && line.length > 0) {
+        // Close the list if we hit non-list content
+        processedLines.push('</ul>');
+        inList = false;
+      }
+      processedLines.push(line);
+    }
+  }
+  
+  // Close list if still open
+  if (inList) {
+    processedLines.push('</ul>');
+  }
+  
+  html = processedLines.join('\n');
+  
+  // Links
+  html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+  
+  // Line breaks and paragraphs
+  html = html.replace(/\n\n+/g, '</p><p>');
   html = '<p>' + html + '</p>';
   
   // Clean up empty paragraphs
-  html = html.replace(/<p><\/p>/g, '');
+  html = html.replace(/<p>\s*<\/p>/g, '');
   html = html.replace(/<p>\s*<h/g, '<h');
   html = html.replace(/<\/h(\d)>\s*<\/p>/g, '</h$1>');
   html = html.replace(/<p>\s*<ul>/g, '<ul>');
   html = html.replace(/<\/ul>\s*<\/p>/g, '</ul>');
+  html = html.replace(/<p>\s*<ol>/g, '<ol>');
+  html = html.replace(/<\/ol>\s*<\/p>/g, '</ol>');
+  html = html.replace(/<p>\s*<pre>/g, '<pre>');
+  html = html.replace(/<\/pre>\s*<\/p>/g, '</pre>');
   
   return html;
 }
